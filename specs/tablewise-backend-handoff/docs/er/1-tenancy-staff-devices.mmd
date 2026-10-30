@@ -1,0 +1,77 @@
+erDiagram
+  organizations ||--o{ outlets : owns
+  outlets ||--o{ staff_members : employs
+  outlets ||--o{ counters : has
+  outlets ||--o{ dining_tables : has
+  outlets ||--o{ devices : has
+  counters |o--o{ devices : "displays for"
+  staff_members |o--o{ devices : "paired by"
+  devices |o--o{ device_pairing_codes : "claimed code"
+  outlets ||--o{ invoice_sequences : numbers
+  outlets ||--o{ audit_log : records
+  staff_members |o--o{ audit_log : "acted"
+  organizations {
+    uuid id PK
+    text name
+  }
+  outlets {
+    uuid id PK
+    uuid organization_id FK
+    text name
+    varchar gstin
+    text timezone "Asia/Kolkata"
+    numeric gst_percent
+    numeric service_charge_percent
+    int next_order_no "atomic counter"
+  }
+  staff_members {
+    uuid id PK
+    uuid outlet_id FK
+    uuid user_id "Supabase auth.users"
+    text full_name
+    text role "owner, cashier, kitchen"
+    bool is_active
+    timestamptz last_active_at
+  }
+  counters {
+    uuid id PK
+    uuid outlet_id FK
+    text name "Counter 1"
+  }
+  dining_tables {
+    uuid id PK
+    uuid outlet_id FK
+    varchar label "T1"
+    smallint seats
+  }
+  devices {
+    uuid id PK
+    uuid outlet_id FK
+    uuid counter_id FK
+    text device_type "customer_display"
+    text name
+    bytea token_hash UK "sha256 of device token"
+    timestamptz last_seen_at "online status"
+    timestamptz revoked_at
+  }
+  device_pairing_codes {
+    uuid id PK
+    varchar code "6 digits"
+    uuid device_key "random id from tablet"
+    timestamptz expires_at
+    timestamptz claimed_at
+    uuid device_id FK
+  }
+  invoice_sequences {
+    uuid outlet_id PK
+    char financial_year PK "2026-27"
+    varchar prefix "SFT"
+    int next_number
+  }
+  audit_log {
+    bigint id PK
+    uuid outlet_id FK
+    uuid actor_staff_id FK
+    text action
+    jsonb changes
+  }

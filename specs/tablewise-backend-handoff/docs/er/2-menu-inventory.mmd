@@ -1,0 +1,62 @@
+erDiagram
+  menu_categories ||--o{ menu_items : contains
+  menu_items ||--o{ recipe_items : "made from"
+  ingredients ||--o{ recipe_items : "used in"
+  suppliers |o--o{ ingredients : supplies
+  ingredients ||--o{ stock_movements : "ledger of"
+  orders |o--o{ stock_movements : "consumes or restores"
+  staff_members |o--o{ stock_movements : "recorded by"
+  menu_categories {
+    uuid id PK
+    uuid outlet_id FK
+    text name UK
+    int sort_order
+  }
+  menu_items {
+    uuid id PK
+    uuid outlet_id FK
+    uuid category_id FK
+    text name
+    numeric price "before GST"
+    bool is_veg
+    smallint prep_minutes
+    bool is_available "menu switch"
+    numeric gst_percent_override
+    timestamptz deleted_at "soft delete"
+  }
+  recipe_items {
+    uuid menu_item_id PK
+    uuid ingredient_id PK
+    numeric qty_per_portion
+  }
+  ingredients {
+    uuid id PK
+    uuid outlet_id FK
+    text name
+    text unit "kg, g, l, ml, pcs"
+    numeric current_stock "kept by trigger, never below 0"
+    numeric reorder_level
+    numeric cost_per_unit
+    uuid supplier_id FK
+  }
+  suppliers {
+    uuid id PK
+    uuid outlet_id FK
+    text name
+    varchar phone
+  }
+  stock_movements {
+    bigint id PK
+    uuid ingredient_id FK
+    numeric quantity_delta "+ in, - out"
+    text reason "restock, order_consumption, ..."
+    uuid order_id FK
+    numeric stock_after
+    uuid created_by FK
+  }
+  orders {
+    uuid id PK
+  }
+  staff_members {
+    uuid id PK
+  }

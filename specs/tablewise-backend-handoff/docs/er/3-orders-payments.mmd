@@ -1,0 +1,92 @@
+erDiagram
+  customers |o--o{ orders : places
+  dining_tables |o--o{ orders : seats
+  counters |o--o{ orders : "taken at"
+  staff_members |o--o{ orders : creates
+  orders ||--|{ order_items : contains
+  menu_items |o--o{ order_items : "sold as"
+  orders ||--o{ order_status_events : "history of"
+  orders ||--|{ bills : "billed as"
+  bills ||--o{ payments : "paid by"
+  counters |o--o{ payments : "collected at"
+  customers {
+    uuid id PK
+    uuid outlet_id FK
+    text name
+    varchar phone UK "E.164"
+  }
+  orders {
+    uuid id PK
+    uuid outlet_id FK
+    int order_no UK "1172"
+    date business_date "outlet-local"
+    text order_type "dine_in, takeaway, delivery"
+    text source "pos, swiggy, zomato, website"
+    text status "new, preparing, ready, completed, cancelled"
+    timestamptz status_changed_at "kitchen timer"
+    text payment_status "unpaid, paid (synced from bill)"
+    uuid table_id FK
+    uuid counter_id FK
+    uuid customer_id FK
+    text notes "kitchen note"
+    timestamptz placed_at
+  }
+  order_items {
+    uuid id PK
+    uuid order_id FK
+    uuid menu_item_id FK
+    text item_name "snapshot"
+    numeric unit_price "snapshot"
+    int quantity
+    numeric line_total
+  }
+  order_status_events {
+    bigint id PK
+    uuid order_id FK
+    text from_status
+    text to_status
+    uuid actor_staff_id FK
+    text note "cancel reason"
+    timestamptz created_at
+  }
+  bills {
+    uuid id PK
+    uuid order_id FK "one active per order in V1"
+    text status "open, paid, void"
+    text bill_to_name "snapshot"
+    numeric subtotal
+    numeric discount_amount
+    numeric taxable_amount
+    numeric cgst_amount
+    numeric sgst_amount
+    numeric round_off
+    numeric total_amount
+    varchar invoice_no UK "SFT/26-27/000123"
+    timestamptz finalised_at
+  }
+  payments {
+    uuid id PK
+    uuid bill_id FK
+    text method "cash, upi_qr, card, payment_link, platform"
+    text status "pending, succeeded, failed, expired, ..."
+    numeric amount
+    text gateway_qr_id UK "Razorpay qr id"
+    text qr_payload "upi://pay..."
+    timestamptz expires_at
+    text gateway_payment_id UK
+    text gateway_reference "UTR or RRN"
+    numeric tendered_amount "cash"
+    uuid counter_id FK
+  }
+  dining_tables {
+    uuid id PK
+  }
+  counters {
+    uuid id PK
+  }
+  staff_members {
+    uuid id PK
+  }
+  menu_items {
+    uuid id PK
+  }

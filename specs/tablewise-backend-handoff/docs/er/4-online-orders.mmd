@@ -1,0 +1,50 @@
+erDiagram
+  platform_integrations ||--o{ platform_item_mappings : maps
+  menu_items ||--o{ platform_item_mappings : "mapped from"
+  platform_integrations ||--o{ online_orders : receives
+  online_orders |o--o| orders : "becomes on accept"
+  staff_members |o--o{ online_orders : "accepts or rejects"
+  platform_integrations {
+    uuid id PK
+    uuid outlet_id FK
+    text platform UK "swiggy, zomato, website"
+    text external_store_id
+    bool is_accepting "pause switch"
+    smallint accept_window_seconds "180"
+    text credentials_secret_ref
+  }
+  platform_item_mappings {
+    uuid id PK
+    uuid integration_id FK
+    text external_item_id UK
+    uuid menu_item_id FK
+  }
+  online_orders {
+    uuid id PK
+    uuid integration_id FK
+    text external_order_id UK "what the rider quotes"
+    text status "incoming, accepted, rejected, missed, cancelled_by_platform"
+    timestamptz accept_by "received + window"
+    smallint prep_minutes "promised on accept"
+    uuid decided_by FK
+    text reject_reason
+    uuid order_id FK "kitchen order"
+    jsonb payload "items and instructions as sent"
+  }
+  gateway_webhook_events {
+    bigint id PK
+    text provider UK
+    text event_id UK
+    text event_type
+    jsonb payload "full platform data stays here"
+    timestamptz processed_at
+  }
+  orders {
+    uuid id PK
+  }
+  menu_items {
+    uuid id PK
+  }
+  staff_members {
+    uuid id PK
+  }

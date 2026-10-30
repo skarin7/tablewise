@@ -1,0 +1,5 @@
+services:
+  db:
+    image: postgres:16
+    environment: { POSTGRES_DB: tablewise, POSTGRES_USER: tablewise, POSTGRES_PASSWORD: tablewise }
+    ports: ["5432:5432"]

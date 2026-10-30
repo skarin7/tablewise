@@ -1,0 +1,47 @@
+# One command for local use: Postgres 16 (instead of Supabase), the Spring Boot API and the Vue app.
+#   docker compose up --build        then open http://localhost:5173
+# Local sign-in uses the API's "local" profile (Bearer dev-<uuid>); never deploy this file's settings.
+services:
+  db:
+    image: postgres:16
+    environment: { POSTGRES_DB: tablewise, POSTGRES_USER: tablewise, POSTGRES_PASSWORD: tablewise }
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U tablewise -d tablewise"], interval: 3s, timeout: 3s, retries: 20 }
+
+  api:
+    build: ./backend
+    depends_on: { db: { condition: service_healthy } }
+    environment:
+      SPRING_PROFILES_ACTIVE: local
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/tablewise
+      SPRING_DATASOURCE_USERNAME: tablewise
+      SPRING_DATASOURCE_PASSWORD: tablewise
+      ALLOWED_ORIGINS: http://localhost:5173
+      # optional: Razorpay test keys in your shell or a .env file enable UPI QR; without them cash and card still work
+      RAZORPAY_KEY_ID: ${RAZORPAY_KEY_ID:-}
+      RAZORPAY_KEY_SECRET: ${RAZORPAY_KEY_SECRET:-}
+      RAZORPAY_WEBHOOK_SECRET: ${RAZORPAY_WEBHOOK_SECRET:-}
+    ports: ["8080:8080"]
+
+  # Runs once the API has applied the Flyway migrations, then exits. Re-running it changes nothing.
+  seed:
+    image: postgres:16
+    depends_on: [api]
+    restart: "no"
+    environment: { PGPASSWORD: tablewise }
+    volumes: ["./docker/seed.sql:/seed.sql:ro"]
+    entrypoint: ["sh", "-c", "until psql -h db -U tablewise -d tablewise -tAc 'select 1 from pos.outlets limit 1' >/dev/null 2>&1; do echo waiting for migrations; sleep 2; done; psql -h db -U tablewise -d tablewise -v ON_ERROR_STOP=1 -f /seed.sql && echo seeded"]
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8080
+        VITE_WS_URL: ws://localhost:8080/ws
+        VITE_LOCAL_DEV: "true"
+    depends_on: [api]
+    ports: ["5173:80"]
+
+volumes:
+  pgdata:

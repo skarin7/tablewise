@@ -1,0 +1,33 @@
+erDiagram
+  organizations ||--o{ outlets : owns
+  outlets ||--o{ staff_members : employs
+  outlets ||--o{ counters : has
+  outlets ||--o{ dining_tables : has
+  outlets ||--o{ devices : has
+  counters |o--o{ devices : "displays for"
+  devices |o--o{ device_pairing_codes : "paired with"
+  outlets ||--o{ menu_categories : has
+  menu_categories ||--o{ menu_items : contains
+  menu_items ||--o{ recipe_items : "made from"
+  ingredients ||--o{ recipe_items : "used in"
+  suppliers |o--o{ ingredients : supplies
+  ingredients ||--o{ stock_movements : "ledger of"
+  orders |o--o{ stock_movements : "consumes or restores"
+  outlets ||--o{ customers : has
+  customers |o--o{ orders : places
+  dining_tables |o--o{ orders : seats
+  counters |o--o{ orders : "taken at"
+  staff_members |o--o{ orders : creates
+  orders ||--|{ order_items : contains
+  menu_items |o--o{ order_items : "sold as"
+  orders ||--o{ order_status_events : "history of"
+  orders ||--|{ bills : "billed as"
+  bills ||--o{ payments : "paid by"
+  counters |o--o{ payments : "collected at"
+  outlets ||--o{ invoice_sequences : numbers
+  outlets ||--o{ platform_integrations : "connects"
+  platform_integrations ||--o{ platform_item_mappings : maps
+  menu_items ||--o{ platform_item_mappings : "mapped from"
+  platform_integrations ||--o{ online_orders : receives
+  online_orders |o--o| orders : "becomes on accept"
+  outlets ||--o{ audit_log : records

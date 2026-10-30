@@ -1,0 +1,36 @@
+server:
+  port: ${PORT:8080}
+  forward-headers-strategy: framework   # Render terminates TLS
+
+spring:
+  application.name: tablewise-api
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/tablewise}
+    username: ${SPRING_DATASOURCE_USERNAME:tablewise}
+    password: ${SPRING_DATASOURCE_PASSWORD:tablewise}
+  flyway:
+    schemas: pos
+    # History table stays in public: V1 enables RLS on every table in pos, which would deadlock against Flyway's own lock.
+    default-schema: public
+  jpa:
+    open-in-view: false
+    hibernate.ddl-auto: validate
+    properties.hibernate.default_schema: pos
+  jackson.default-property-inclusion: non_null
+
+management:
+  endpoints.web.exposure.include: health
+  endpoint.health.probes.enabled: true
+
+tablewise:
+  timezone: ${APP_TIMEZONE:Asia/Kolkata}
+  allowed-origins: ${ALLOWED_ORIGINS:http://localhost:5173}
+  supabase:
+    issuer: ${SUPABASE_JWT_ISSUER:https://example.supabase.co/auth/v1}
+    jwks-url: ${SUPABASE_JWKS_URL:https://example.supabase.co/auth/v1/.well-known/jwks.json}
+  razorpay:
+    key-id: ${RAZORPAY_KEY_ID:}
+    key-secret: ${RAZORPAY_KEY_SECRET:}
+    webhook-secret: ${RAZORPAY_WEBHOOK_SECRET:}
+    base-url: https://api.razorpay.com
+  platform-webhook-secret: ${PLATFORM_WEBHOOK_SECRET:}

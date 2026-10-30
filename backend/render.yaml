@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: tablewise-api
+    runtime: docker
+    region: singapore
+    plan: free
+    healthCheckPath: /actuator/health
+    autoDeploy: true   # deploys main; enable "wait for CI" in the Render dashboard
+    envVars:
+      - { key: SPRING_DATASOURCE_URL, sync: false }
+      - { key: SPRING_DATASOURCE_USERNAME, sync: false }
+      - { key: SPRING_DATASOURCE_PASSWORD, sync: false }
+      - { key: SUPABASE_JWT_ISSUER, sync: false }
+      - { key: SUPABASE_JWKS_URL, sync: false }
+      - { key: RAZORPAY_KEY_ID, sync: false }
+      - { key: RAZORPAY_KEY_SECRET, sync: false }
+      - { key: RAZORPAY_WEBHOOK_SECRET, sync: false }
+      - { key: PLATFORM_WEBHOOK_SECRET, sync: false }
+      - { key: ALLOWED_ORIGINS, sync: false }
+      - { key: APP_TIMEZONE, value: Asia/Kolkata }
